@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="hi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Squad Finder | Free Fire Tournament Team & Player Finder</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gaming: {
+                            bg: '#0a0d12',
+                            card: '#121721',
+                            border: '#1f293d',
+                            accent: '#ff4655',
+                            gold: '#ffb800',
+                            neon: '#00f0ff',
+                            purple: '#9d4edd'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0d12;
+            color: #f3f4f6;
+        }
+        .font-gaming {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glow-orange {
+            box-shadow: 0 0 15px rgba(255, 70, 85, 0.35);
+        }
+        .glow-gold {
+            box-shadow: 0 0 15px rgba(255, 184, 0, 0.35);
+        }
+        .glow-card:hover {
+            box-shadow: 0 0 20px rgba(255, 184, 0, 0.2);
+            border-color: rgba(255, 184, 0, 0.5);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0d12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffb800;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-all duration-300 flex items-center gap-3 bg-gaming-card border border-amber-500 text-white px-5 py-3 rounded-xl shadow-2xl">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-amber-400 text-xl"></i>
+        <div>
+            <h4 id="toast-title" class="font-bold text-sm font-gaming text-amber-400">Success</h4>
+            <p id="toast-msg" class="text-xs text-gray-300">Action performed successfully!</p>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER / NAVBAR -->
+    <header class="sticky top-0 z-40 bg-gaming-bg/90 backdrop-blur-md border-b border-gaming-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('players')">
+                    <div class="w-11 h-11 bg-gradient-to-tr from-red-600 via-amber-500 to-yellow-400 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                        <i class="fa-solid fa-fire text-black text-2xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-gaming text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500">
+                            FF SQUAD
+                        </span>
+                        <span class="block text-[10px] font-semibold text-gray-400 tracking-widest uppercase -mt-1">FINDER</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav Tabs -->
+                <nav class="hidden md:flex items-center gap-1 bg-gaming-card p-1.5 rounded-2xl border border-gaming-border">
+                    <button onclick="switchTab('players')" id="nav-players" class="nav-btn active flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fa-solid fa-user-ninja text-amber-400"></i> Players
+                    </button>
+                    <button onclick="switchTab('teams')" id="nav-teams" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-400 hover:text-white transition-all">
+                        <i class="fa-solid fa-users text-amber-400"></i> Teams
+                    </button>
+                    <button onclick="switchTab('lfg')" id="nav-lfg" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-400 hover:text-white transition-all relative">
+                        <i class="fa-solid fa-bolt text-yellow-400"></i> Live LFG
+                        <span class="flex h-2 w-2 relative">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                    </button>
+                    <button onclick="switchTab('create')" id="nav-create" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-400 hover:text-white transition-all">
+                        <i class="fa-solid fa-circle-plus text-amber-400"></i> Post / Create
+                    </button>
+                </nav>
+
+                <!-- Action CTA -->
+                <div class="hidden sm:flex items-center gap-3">
+                    <button onclick="switchTab('create')" class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-black font-bold font-gaming text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                        <i class="fa-solid fa-plus-circle mr-1.5"></i> POST ADS
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="md:hidden text-gray-300 hover:text-white p-2">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden border-b border-gaming-border bg-gaming-card px-4 pt-2 pb-4 space-y-2">
+            <button onclick="switchTab('players'); toggleMobileMenu()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-200 hover:bg-gaming-border">
+                <i class="fa-solid fa-user-ninja text-amber-400 w-5"></i> Find Players
+            </button>
+            <button onclick="switchTab('teams'); toggleMobileMenu()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-200 hover:bg-gaming-border">
+                <i class="fa-solid fa-users text-amber-400 w-5"></i> Find Teams
+            </button>
+            <button onclick="switchTab('lfg'); toggleMobileMenu()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-200 hover:bg-gaming-border">
+                <i class="fa-solid fa-bolt text-yellow-400 w-5"></i> Live LFG Feed
+            </button>
+            <button onclick="switchTab('create'); toggleMobileMenu()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-amber-400 hover:bg-gaming-border">
+                <i class="fa-solid fa-plus-circle w-5"></i> Create Team / Profile Post
+            </button>
+        </div>
+    </header>
+
+    <!-- HERO / QUICK STATS BAR -->
+    <section class="bg-gradient-to-b from-gaming-card/80 to-gaming-bg border-b border-gaming-border py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                <!-- Banner Text -->
+                <div class="md:col-span-7 space-y-3 text-center md:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider">
+                        <i class="fa-solid fa-fire animate-pulse"></i> Free Fire Esports Hub
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-gaming tracking-tight text-white">
+                        APNI SQUAD BANAO <br class="hidden sm:inline">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500">
+                            TOURNAMENTS JEETO!
+                        </span>
+                    </h1>
+                    <p class="text-gray-400 text-sm sm:text-base max-w-xl">
+                        Sahi teammates aur Pro Squads dhoondhna hua aasaan. Rusher, Sniper, Support, ya IGL — apni requirement ke according connect karo!
+                    </p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="md:col-span-5 grid grid-cols-3 gap-3">
+                    <div class="bg-gaming-card border border-gaming-border p-4 rounded-2xl text-center">
+                        <div class="text-amber-400 text-2xl font-black font-gaming" id="stat-players-count">128+</div>
+                        <div class="text-gray-400 text-xs font-medium mt-1">Active Players</div>
+                    </div>
+                    <div class="bg-gaming-card border border-gaming-border p-4 rounded-2xl text-center">
+                        <div class="text-orange-400 text-2xl font-black font-gaming" id="stat-teams-count">42+</div>
+                        <div class="text-gray-400 text-xs font-medium mt-1">Teams Looking</div>
+                    </div>
+                    <div class="bg-gaming-card border border-gaming-border p-4 rounded-2xl text-center">
+                        <div class="text-green-400 text-2xl font-black font-gaming">24/7</div>
+                        <div class="text-gray-400 text-xs font-medium mt-1">Live Scrims</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- TAB 1: PLAYERS SEARCH -->
+        <section id="tab-players" class="tab-content space-y-6">
+            <!-- Filter & Search Bar -->
+            <div class="bg-gaming-card border border-gaming-border p-4 sm:p-6 rounded-2xl space-y-4">
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <!-- Search Input -->
+                    <div class="relative w-full md:w-96">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="player-search-input" oninput="renderPlayers()" placeholder="Search IGN, Free Fire UID, or Name..." 
+                            class="w-full bg-gaming-bg border border-gaming-border rounded-xl pl-11 pr-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500 transition-colors">
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <!-- Role Filter -->
+                        <select id="player-role-filter" onchange="renderPlayers()" class="bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <option value="ALL">All Roles 🎯</option>
+                            <option value="Rusher">⚡ Rusher</option>
+                            <option value="Sniper">🎯 Sniper</option>
+                            <option value="Support">🛡️ Support</option>
+                            <option value="IGL">👑 IGL</option>
+                        </select>
+
+                        <!-- Rank Filter -->
+                        <select id="player-rank-filter" onchange="renderPlayers()" class="bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <option value="ALL">All Ranks 🏆</option>
+                            <option value="Grandmaster">Grandmaster</option>
+                            <option value="Heroic">Heroic</option>
+                            <option value="Master">Master</option>
+                            <option value="Diamond">Diamond</option>
+                        </select>
+
+                        <!-- Reset Filter -->
+                        <button onclick="resetPlayerFilters()" class="px-4 py-3 bg-gaming-border hover:bg-gray-700 text-gray-300 text-sm font-semibold rounded-xl transition-all">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Players Cards Grid -->
+            <div id="players-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Rendered dynamically via JavaScript -->
+            </div>
+        </section>
+
+
+        <!-- TAB 2: TEAMS SEARCH -->
+        <section id="tab-teams" class="tab-content hidden space-y-6">
+            <!-- Filter & Search Bar -->
+            <div class="bg-gaming-card border border-gaming-border p-4 sm:p-6 rounded-2xl space-y-4">
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="relative w-full md:w-96">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="team-search-input" oninput="renderTeams()" placeholder="Search Team Name or Requirements..." 
+                            class="w-full bg-gaming-bg border border-gaming-border rounded-xl pl-11 pr-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500 transition-colors">
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <select id="team-role-filter" onchange="renderTeams()" class="bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <option value="ALL">Needed Role (All)</option>
+                            <option value="Rusher">⚡ Rusher Needed</option>
+                            <option value="Sniper">🎯 Sniper Needed</option>
+                            <option value="Support">🛡️ Support Needed</option>
+                            <option value="IGL">👑 IGL Needed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teams Grid -->
+            <div id="teams-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Rendered dynamically via JavaScript -->
+            </div>
+        </section>
+
+
+        <!-- TAB 3: CREATE / REGISTER POST -->
+        <section id="tab-create" class="tab-content hidden max-w-3xl mx-auto space-y-6">
+            <div class="bg-gaming-card border border-gaming-border p-6 sm:p-8 rounded-2xl">
+                <!-- Form Mode Selector Switch -->
+                <div class="flex bg-gaming-bg p-1.5 rounded-xl border border-gaming-border mb-8">
+                    <button id="form-tab-player" onclick="setFormMode('player')" class="w-1/2 py-3 rounded-lg text-sm font-bold font-gaming transition-all bg-amber-500 text-black">
+                        <i class="fa-solid fa-user mr-2"></i> REGISTER PLAYER PROFILE
+                    </button>
+                    <button id="form-tab-team" onclick="setFormMode('team')" class="w-1/2 py-3 rounded-lg text-sm font-bold font-gaming text-gray-400 transition-all hover:text-white">
+                        <i class="fa-solid fa-users mr-2"></i> CREATE TEAM POST
+                    </button>
+                </div>
+
+                <!-- PLAYER FORM -->
+                <form id="form-player" onsubmit="handlePlayerSubmit(event)" class="space-y-5">
+                    <h3 class="text-xl font-bold font-gaming text-amber-400 border-b border-gaming-border pb-3">
+                        <i class="fa-solid fa-id-card mr-2"></i> Player Info & Stats
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">In-Game Name (IGN) *</label>
+                            <input type="text" id="p-ign" required placeholder="e.g. RASTAR_99" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Free Fire UID *</label>
+                            <input type="text" id="p-uid" required placeholder="e.g. 1234567890" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Current Rank *</label>
+                            <select id="p-rank" required class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                                <option value="Grandmaster">Grandmaster 🏆</option>
+                                <option value="Heroic" selected>Heroic 🔥</option>
+                                <option value="Master">Master 👑</option>
+                                <option value="Diamond">Diamond 💎</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">K/D Ratio *</label>
+                            <input type="number" step="0.1" id="p-kd" required placeholder="e.g. 4.2" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Headshot %</label>
+                            <input type="text" id="p-hs" placeholder="e.g. 68%" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase mb-2">Primary Roles *</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <label class="flex items-center gap-2 bg-gaming-bg border border-gaming-border p-3 rounded-xl cursor-pointer hover:border-amber-500">
+                                <input type="checkbox" name="p-roles" value="Rusher" class="accent-amber-500" checked>
+                                <span class="text-xs font-semibold">⚡ Rusher</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-gaming-bg border border-gaming-border p-3 rounded-xl cursor-pointer hover:border-amber-500">
+                                <input type="checkbox" name="p-roles" value="Sniper" class="accent-amber-500">
+                                <span class="text-xs font-semibold">🎯 Sniper</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-gaming-bg border border-gaming-border p-3 rounded-xl cursor-pointer hover:border-amber-500">
+                                <input type="checkbox" name="p-roles" value="Support" class="accent-amber-500">
+                                <span class="text-xs font-semibold">🛡️ Support</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-gaming-bg border border-gaming-border p-3 rounded-xl cursor-pointer hover:border-amber-500">
+                                <input type="checkbox" name="p-roles" value="IGL" class="accent-amber-500">
+                                <span class="text-xs font-semibold">👑 IGL</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Voice Mic Status</label>
+                            <select id="p-mic" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                                <option value="Always On 🎙️">Always On 🎙️</option>
+                                <option value="Push To Talk 🔊">Push To Talk 🔊</option>
+                                <option value="No Mic 🔇">No Mic 🔇</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Play Time / Availability</label>
+                            <input type="text" id="p-time" placeholder="e.g. Evening 6 PM - 11 PM" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">WhatsApp Number (For Direct Contact) *</label>
+                            <input type="text" id="p-whatsapp" required placeholder="e.g. 919876543210" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Discord Tag (Optional)</label>
+                            <input type="text" id="p-discord" placeholder="e.g. player#1234" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Bio / Tournament Experience</label>
+                        <textarea id="p-bio" rows="3" placeholder="Describe your playstyle or previous tournament achievements..." class="w-full bg-gaming-bg border border-gaming-border rounded-xl p-4 text-sm text-gray-200 focus:border-amber-500 outline-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-black font-bold font-gaming rounded-xl shadow-lg shadow-amber-500/20 transition-all">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> PUBLISH PLAYER PROFILE
+                    </button>
+                </form>
+
+                <!-- TEAM FORM -->
+                <form id="form-team" onsubmit="handleTeamSubmit(event)" class="space-y-5 hidden">
+                    <h3 class="text-xl font-bold font-gaming text-amber-400 border-b border-gaming-border pb-3">
+                        <i class="fa-solid fa-shield-halved mr-2"></i> Team Details & Requirements
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Team Name *</label>
+                            <input type="text" id="t-name" required placeholder="e.g. TOTAL GAMING ESPORTS" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Team Tag / Short Code</label>
+                            <input type="text" id="t-tag" placeholder="e.g. TG" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Slots Open / Players Needed *</label>
+                            <input type="text" id="t-slots" required placeholder="e.g. Need 1x Sniper & 1x Rusher" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Min Required Rank</label>
+                            <select id="t-minrank" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                                <option value="Heroic+">Heroic+</option>
+                                <option value="Grandmaster">Grandmaster Only</option>
+                                <option value="Master+">Master+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Min Required K/D Ratio</label>
+                            <input type="number" step="0.1" id="t-minkd" placeholder="e.g. 3.5" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Daily Scrims / Match Time</label>
+                            <input type="text" id="t-time" placeholder="e.g. 8 PM - 11 PM Scrims" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Leader WhatsApp Contact *</label>
+                            <input type="text" id="t-whatsapp" required placeholder="e.g. 919876543210" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Discord / Guild Link</label>
+                            <input type="text" id="t-discord" placeholder="e.g. discord.gg/squad" class="w-full bg-gaming-bg border border-gaming-border rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Team Achievements & Requirements Description</label>
+                        <textarea id="t-bio" rows="3" placeholder="Mention past tournament wins, custom room scrims experience, etc." class="w-full bg-gaming-bg border border-gaming-border rounded-xl p-4 text-sm text-gray-200 focus:border-amber-500 outline-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-black font-bold font-gaming rounded-xl shadow-lg shadow-amber-500/20 transition-all">
+                        <i class="fa-solid fa-bullhorn mr-2"></i> POST TEAM REQUIREMENT
+                    </button>
+                </form>
+            </div>
+        </section>
+
+
+        <!-- TAB 4: LIVE LFG FEED -->
+        <section id="tab-lfg" class="tab-content hidden space-y-6 max-w-4xl mx-auto">
+            <!-- Create Instant LFG Post -->
+            <div class="bg-gaming-card border border-gaming-border p-5 rounded-2xl">
+                <h3 class="text-base font-bold font-gaming text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-yellow-400"></i> Post Quick LFG Announcement
+                </h3>
+                <form onsubmit="handleLfgSubmit(event)" class="space-y-3">
+                    <textarea id="lfg-msg" required rows="2" placeholder="e.g. Need +1 Rusher right now for 9 PM Paid Scrims! Mic Mandatory, KD 4.0+" class="w-full bg-gaming-bg border border-gaming-border rounded-xl p-3 text-sm text-gray-200 focus:border-amber-500 outline-none"></textarea>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-between items-center">
+                        <input type="text" id="lfg-contact" required placeholder="WhatsApp Number / Discord ID" class="w-full sm:w-80 bg-gaming-bg border border-gaming-border rounded-xl px-3 py-2 text-xs text-gray-200 focus:border-amber-500 outline-none">
+                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs font-gaming rounded-xl transition-all">
+                            POST ANNOUNCEMENT
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Feed Container -->
+            <div id="lfg-feed-container" class="space-y-4">
+                <!-- Dynamic LFG posts rendered here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CONTACT / DETAIL MODAL -->
+    <div id="contact-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-gaming-card border border-gaming-border rounded-2xl max-w-md w-full p-6 space-y-6 relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto text-black text-2xl font-black font-gaming shadow-lg shadow-amber-500/30" id="modal-avatar">
+                    FF
+                </div>
+                <h3 class="text-xl font-bold font-gaming text-white" id="modal-title">Name</h3>
+                <p class="text-xs text-amber-400 font-semibold uppercase tracking-wider" id="modal-subtitle">Role / Tag</p>
+            </div>
+
+            <div class="space-y-3 bg-gaming-bg p-4 rounded-xl border border-gaming-border text-sm">
+                <div class="flex justify-between items-center pb-2 border-b border-gaming-border">
+                    <span class="text-gray-400 text-xs">Free Fire UID:</span>
+                    <span class="font-mono font-bold text-amber-400" id="modal-uid">12345678</span>
+                </div>
+                <div id="modal-extra-info" class="text-xs text-gray-300 space-y-1">
+                    <!-- Additional details populated dynamically -->
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <a id="modal-wa-btn" href="#" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Direct Chat on WhatsApp
+                </a>
+                <button id="modal-copy-uid-btn" onclick="copyModalUid()" class="flex items-center justify-center gap-2 w-full py-3 bg-gaming-border hover:bg-gray-700 text-gray-200 font-semibold text-xs rounded-xl transition-all">
+                    <i class="fa-regular fa-copy"></i> Copy Free Fire UID
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-gaming-card border-t border-gaming-border py-8 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-3">
+            <div class="flex justify-center items-center gap-2 text-amber-400 font-gaming text-sm font-bold">
+                <i class="fa-solid fa-fire"></i> FF SQUAD FINDER
+            </div>
+            <p>Made for the Free Fire Esports & Competitive Community. Connect with Players, Join Squads & Win Tournaments.</p>
+            <p class="text-[10px] text-gray-600">Free Fire is a registered trademark of Garena. This site is an independent fan community platform.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // Default Sample Data
+        const initialPlayers = [
+            {
+                id: 'p1',
+                ign: 'RASTAR_99',
+                uid: '184729301',
+                rank: 'Grandmaster',
+                kd: 5.4,
+                hs: '72%',
+                roles: ['Rusher', 'IGL'],
+                mic: 'Always On 🎙️',
+                time: '7 PM - 12 AM',
+                whatsapp: '919876543210',
+                discord: 'rastar#9999',
+                bio: 'Tournament Rusher with 2+ years scrims experience. Ex-Guild Officer.',
+                verified: true
+            },
+            {
+                id: 'p2',
+                ign: 'SK_SABIR_FAN',
+                uid: '982341052',
+                rank: 'Heroic',
+                kd: 4.1,
+                hs: '65%',
+                roles: ['Sniper'],
+                mic: 'Always On 🎙️',
+                time: 'Evening & Night',
+                whatsapp: '919876543211',
+                discord: '',
+                bio: 'AWM & M82B Marksman. High damage output from long range.',
+                verified: false
+            },
+            {
+                id: 'p3',
+                ign: 'MAFIA_IGL',
+                uid: '451293847',
+                rank: 'Master',
+                kd: 3.8,
+                hs: '54%',
+                roles: ['IGL', 'Support'],
+                mic: 'Always On 🎙️',
+                time: '8 PM - 1 AM',
+                whatsapp: '919876543212',
+                discord: 'mafia_igl#1111',
+                bio: 'Zone predictor & rotation planner. Calm comms under pressure.',
+                verified: true
+            },
+            {
+                id: 'p4',
+                ign: 'OP_SNIPER_77',
+                uid: '772391024',
+                rank: 'Heroic',
+                kd: 3.9,
+                hs: '60%',
+                roles: ['Sniper', 'Rusher'],
+                mic: 'Push To Talk 🔊',
+                time: 'Flexible',
+                whatsapp: '919876543213',
+                discord: '',
+                bio: 'Double sniper player or secondary entry fragger.',
+                verified: false
+            }
+        ];
+
+        const initialTeams = [
+            {
+                id: 't1',
+                name: 'GALAXY ESPORTS',
+                tag: 'GX',
+                slots: 'Need 1x Sniper & 1x Support',
+                minRank: 'Heroic+',
+                minKd: 4.0,
+                time: '8 PM - 11 PM Scrims',
+                whatsapp: '919876543210',
+                discord: 'discord.gg/galaxy',
+                bio: 'Weekly custom room tournament winners. Looking for experienced players for upcoming cup.'
+            },
+            {
+                id: 't2',
+                name: 'DARK WARRIORS',
+                tag: 'DW',
+                slots: 'Need 1x Entry Rusher',
+                minRank: 'Grandmaster',
+                minKd: 4.5,
+                time: 'Night 9 PM - 1 AM',
+                whatsapp: '919876543214',
+                discord: '',
+                bio: 'Aggressive playstyle squad. Looking for an explosive Rusher with fast gloo wall skills.'
+            }
+        ];
+
+        const initialLfg = [
+            {
+                id: 'l1',
+                msg: 'Need +1 Rusher right now for 9 PM Scrims! Mic mandatory, KD 3.5+ required.',
+                contact: '919876543210',
+                time: '10 mins ago'
+            },
+            {
+                id: 'l2',
+                msg: 'Free Agent Sniper looking for active Tournament Squad. Hit me up!',
+                contact: '919876543211',
+                time: '25 mins ago'
+            }
+        ];
+
+        // Load or Initialize Local Storage
+        let players = JSON.parse(localStorage.getItem('ff_players')) || initialPlayers;
+        let teams = JSON.parse(localStorage.getItem('ff_teams')) || initialTeams;
+        let lfgFeed = JSON.parse(localStorage.getItem('ff_lfg')) || initialLfg;
+
+        // Current Active Modal Data
+        let currentModalUid = '';
+
+        // App Initialization
+        window.onload = function() {
+            renderPlayers();
+            renderTeams();
+            renderLfg();
+            updateStatsCounters();
+        };
+
+        // Navigation Tab Switcher
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-amber-500/10', 'text-amber-400', 'border', 'border-amber-500/30');
+                el.classList.add('text-gray-400');
+            });
+
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            const targetNav = document.getElementById(`nav-${tabName}`);
+
+            if(targetTab) targetTab.classList.remove('hidden');
+            if(targetNav) {
+                targetNav.classList.add('bg-amber-500/10', 'text-amber-400', 'border', 'border-amber-500/30');
+                targetNav.classList.remove('text-gray-400');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Stats Counter Update
+        function updateStatsCounters() {
+            document.getElementById('stat-players-count').innerText = players.length + '+';
+            document.getElementById('stat-teams-count').innerText = teams.length + '+';
+        }
+
+        // Render Players Cards
+        function renderPlayers() {
+            const container = document.getElementById('players-grid');
+            const searchVal = document.getElementById('player-search-input').value.toLowerCase();
+            const roleFilter = document.getElementById('player-role-filter').value;
+            const rankFilter = document.getElementById('player-rank-filter').value;
+
+            const filtered = players.filter(p => {
+                const matchesSearch = p.ign.toLowerCase().includes(searchVal) || p.uid.includes(searchVal);
+                const matchesRole = roleFilter === 'ALL' || p.roles.includes(roleFilter);
+                const matchesRank = rankFilter === 'ALL' || p.rank === rankFilter;
+                return matchesSearch && matchesRole && matchesRank;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400 bg-gaming-card border border-gaming-border rounded-2xl">
+                        <i class="fa-solid fa-ghost text-4xl mb-3 text-gray-600"></i>
+                        <p class="font-bold text-base">Koi player nahi mila!</p>
+                        <p class="text-xs text-gray-500">Filter change karke try karo ya apna profile post karo.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => `
+                <div class="bg-gaming-card border border-gaming-border rounded-2xl p-5 hover:border-amber-500/50 transition-all glow-card flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <!-- Top Header -->
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-black font-black font-gaming text-lg shadow-md">
+                                    ${p.ign.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold font-gaming text-base text-white flex items-center gap-1.5">
+                                        ${p.ign}
+                                        ${p.verified ? '<i class="fa-solid fa-circle-check text-amber-400 text-xs" title="Verified Player"></i>' : ''}
+                                    </h3>
+                                    <p class="text-xs text-gray-400 font-mono">UID: ${p.uid}</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold rounded-lg uppercase tracking-wider">
+                                ${p.rank}
+                            </span>
+                        </div>
+
+                        <!-- Stats Row -->
+                        <div class="grid grid-cols-3 gap-2 bg-gaming-bg p-3 rounded-xl border border-gaming-border text-center text-xs">
+                            <div>
+                                <span class="block text-gray-500 text-[10px]">K/D RATIO</span>
+                                <span class="font-black text-amber-400 font-gaming">${p.kd}</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500 text-[10px]">HEADSHOT</span>
+                                <span class="font-black text-white font-gaming">${p.hs || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500 text-[10px]">MIC</span>
+                                <span class="font-semibold text-gray-300 text-[10px] truncate block">${p.mic}</span>
+                            </div>
+                        </div>
+
+                        <!-- Roles Badges -->
+                        <div class="flex flex-wrap gap-1.5">
+                            ${p.roles.map(r => `
+                                <span class="px-2.5 py-1 bg-gaming-border text-gray-200 text-[11px] font-semibold rounded-lg">
+                                    ${getRoleIcon(r)} ${r}
+                                </span>
+                            `).join('')}
+                        </div>
+
+                        <!-- Bio -->
+                        <p class="text-xs text-gray-400 line-clamp-2">${p.bio || 'Free Fire competitive player looking for tournament team.'}</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-2 border-t border-gaming-border flex items-center gap-2">
+                        <button onclick="openPlayerModal('${p.id}')" class="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-black font-bold font-gaming text-xs rounded-xl shadow-md transition-all">
+                            <i class="fa-solid fa-paper-plane mr-1"></i> INVITE / CONTACT
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Teams Cards
+        function renderTeams() {
+            const container = document.getElementById('teams-grid');
+            const searchVal = document.getElementById('team-search-input').value.toLowerCase();
+            const roleFilter = document.getElementById('team-role-filter').value;
+
+            const filtered = teams.filter(t => {
+                const matchesSearch = t.name.toLowerCase().includes(searchVal) || t.slots.toLowerCase().includes(searchVal);
+                const matchesRole = roleFilter === 'ALL' || t.slots.toLowerCase().includes(roleFilter.toLowerCase());
+                return matchesSearch && matchesRole;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400 bg-gaming-card border border-gaming-border rounded-2xl">
+                        <i class="fa-solid fa-shield-cat text-4xl mb-3 text-gray-600"></i>
+                        <p class="font-bold text-base">Koi Team nahi mili!</p>
+                        <p class="text-xs text-gray-500">Apni team post karke new players invite karein.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(t => `
+                <div class="bg-gaming-card border border-gaming-border rounded-2xl p-6 hover:border-amber-500/50 transition-all glow-card flex flex-col justify-between space-y-4">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-14 h-14 bg-gradient-to-tr from-red-600 to-amber-500 rounded-xl flex items-center justify-center text-black font-black font-gaming text-xl shadow-md">
+                                    ${t.tag || t.name.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold font-gaming text-lg text-white">${t.name}</h3>
+                                    <span class="text-xs font-semibold text-amber-400"><i class="fa-solid fa-clock mr-1"></i> ${t.time || 'Daily Scrims'}</span>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-lg">
+                                NEEDING PLAYERS
+                            </span>
+                        </div>
+
+                        <div class="bg-gaming-bg p-4 rounded-xl border border-gaming-border space-y-2">
+                            <div class="text-xs text-amber-400 font-bold uppercase tracking-wider">
+                                <i class="fa-solid fa-user-plus mr-1"></i> Required Slots:
+                            </div>
+                            <div class="text-sm font-semibold text-white">${t.slots}</div>
+                            <div class="flex items-center gap-4 text-xs text-gray-400 pt-1">
+                                <span>Min Rank: <strong class="text-gray-200">${t.minRank}</strong></span>
+                                <span>Min K/D: <strong class="text-gray-200">${t.minKd || 'N/A'}</strong></span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-400">${t.bio || 'Participating in daily tournaments and custom rooms.'}</p>
+                    </div>
+
+                    <div class="pt-2 border-t border-gaming-border flex gap-2">
+                        <a href="https://wa.me/${t.whatsapp}?text=Hello!%20I%20want%20to%20join%20your%20Free%20Fire%20Team:%20${encodeURIComponent(t.name)}" target="_blank" 
+                           class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-gaming text-xs rounded-xl text-center shadow-md transition-all">
+                            <i class="fa-brands fa-whatsapp mr-1 text-sm"></i> APPLY / CONTACT TEAM
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render LFG Feed
+        function renderLfg() {
+            const container = document.getElementById('lfg-feed-container');
+            if (lfgFeed.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 text-xs">No active LFG announcements.</p>';
+                return;
+            }
+
+            container.innerHTML = lfgFeed.map(item => `
+                <div class="bg-gaming-card border border-gaming-border p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 text-xs text-amber-400 font-semibold">
+                            <i class="fa-solid fa-bolt"></i> Quick Request 
+                            <span class="text-gray-500">• ${item.time || 'Just now'}</span>
+                        </div>
+                        <p class="text-sm text-gray-200">${item.msg}</p>
+                    </div>
+                    <a href="https://wa.me/${item.contact}?text=Hi!%20Saw%20your%20Free%20Fire%20LFG%20Post:%20${encodeURIComponent(item.msg)}" target="_blank" 
+                       class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs font-gaming rounded-lg transition-all whitespace-nowrap">
+                        CONNECT NOW
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        // Form Mode Switcher (Player vs Team)
+        function setFormMode(mode) {
+            const pBtn = document.getElementById('form-tab-player');
+            const tBtn = document.getElementById('form-tab-team');
+            const pForm = document.getElementById('form-player');
+            const tForm = document.getElementById('form-team');
+
+            if (mode === 'player') {
+                pBtn.className = 'w-1/2 py-3 rounded-lg text-sm font-bold font-gaming transition-all bg-amber-500 text-black';
+                tBtn.className = 'w-1/2 py-3 rounded-lg text-sm font-bold font-gaming text-gray-400 transition-all hover:text-white';
+                pForm.classList.remove('hidden');
+                tForm.classList.add('hidden');
+            } else {
+                tBtn.className = 'w-1/2 py-3 rounded-lg text-sm font-bold font-gaming transition-all bg-amber-500 text-black';
+                pBtn.className = 'w-1/2 py-3 rounded-lg text-sm font-bold font-gaming text-gray-400 transition-all hover:text-white';
+                tForm.classList.remove('hidden');
+                pForm.classList.add('hidden');
+            }
+        }
+
+        // Form Submit Handlers
+        function handlePlayerSubmit(e) {
+            e.preventDefault();
+            const checkedRoles = Array.from(document.querySelectorAll('input[name="p-roles"]:checked')).map(cb => cb.value);
+
+            if (checkedRoles.length === 0) {
+                showToast('Warning', 'Aapko kam se kam 1 role select karna padega!', 'fa-triangle-exclamation', 'text-yellow-400');
+                return;
+            }
+
+            const newPlayer = {
+                id: 'p_' + Date.now(),
+                ign: document.getElementById('p-ign').value,
+                uid: document.getElementById('p-uid').value,
+                rank: document.getElementById('p-rank').value,
+                kd: parseFloat(document.getElementById('p-kd').value) || 3.0,
+                hs: document.getElementById('p-hs').value || '50%',
+                roles: checkedRoles,
+                mic: document.getElementById('p-mic').value,
+                time: document.getElementById('p-time').value || 'Flexible',
+                whatsapp: document.getElementById('p-whatsapp').value,
+                discord: document.getElementById('p-discord').value,
+                bio: document.getElementById('p-bio').value,
+                verified: false
+            };
+
+            players.unshift(newPlayer);
+            localStorage.setItem('ff_players', JSON.stringify(players));
+            updateStatsCounters();
+            renderPlayers();
+            switchTab('players');
+            showToast('Success!', 'Aapka Player Profile successfully post ho gaya!', 'fa-circle-check', 'text-amber-400');
+            e.target.reset();
+        }
+
+        function handleTeamSubmit(e) {
+            e.preventDefault();
+            const newTeam = {
+                id: 't_' + Date.now(),
+                name: document.getElementById('t-name').value,
+                tag: document.getElementById('t-tag').value || 'FF',
+                slots: document.getElementById('t-slots').value,
+                minRank: document.getElementById('t-minrank').value,
+                minKd: parseFloat(document.getElementById('t-minkd').value) || 3.0,
+                time: document.getElementById('t-time').value || 'Evening Scrims',
+                whatsapp: document.getElementById('t-whatsapp').value,
+                discord: document.getElementById('t-discord').value,
+                bio: document.getElementById('t-bio').value
+            };
+
+            teams.unshift(newTeam);
+            localStorage.setItem('ff_teams', JSON.stringify(teams));
+            updateStatsCounters();
+            renderTeams();
+            switchTab('teams');
+            showToast('Success!', 'Team recruitment post successfully ho gaya!', 'fa-circle-check', 'text-amber-400');
+            e.target.reset();
+        }
+
+        function handleLfgSubmit(e) {
+            e.preventDefault();
+            const msg = document.getElementById('lfg-msg').value;
+            const contact = document.getElementById('lfg-contact').value;
+
+            const newLfg = {
+                id: 'l_' + Date.now(),
+                msg: msg,
+                contact: contact,
+                time: 'Just now'
+            };
+
+            lfgFeed.unshift(newLfg);
+            localStorage.setItem('ff_lfg', JSON.stringify(lfgFeed));
+            renderLfg();
+            showToast('Posted!', 'LFG post Live Feed me add ho gaya.', 'fa-bolt', 'text-yellow-400');
+            e.target.reset();
+        }
+
+        // Modal Controls
+        function openPlayerModal(playerId) {
+            const p = players.find(item => item.id === playerId);
+            if (!p) return;
+
+            currentModalUid = p.uid;
+            document.getElementById('modal-avatar').innerText = p.ign.substring(0, 2).toUpperCase();
+            document.getElementById('modal-title').innerText = p.ign;
+            document.getElementById('modal-subtitle').innerText = `${p.rank} • KD: ${p.kd}`;
+            document.getElementById('modal-uid').innerText = p.uid;
+
+            document.getElementById('modal-extra-info').innerHTML = `
+                <p><strong>Roles:</strong> ${p.roles.join(', ')}</p>
+                <p><strong>Mic:</strong> ${p.mic}</p>
+                <p><strong>Play Time:</strong> ${p.time}</p>
+                ${p.discord ? `<p><strong>Discord:</strong> ${p.discord}</p>` : ''}
+                <p class="mt-2 pt-2 border-t border-gaming-border text-gray-400">${p.bio || ''}</p>
+            `;
+
+            document.getElementById('modal-wa-btn').href = `https://wa.me/${p.whatsapp}?text=Hello%20${encodeURIComponent(p.ign)},%20I%20found%20your%20profile%20on%20FF%20Squad%20Finder!%20Want%20to%20play%20together?`;
+
+            document.getElementById('contact-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('contact-modal').classList.add('hidden');
+        }
+
+        function copyModalUid() {
+            if (!currentModalUid) return;
+            const tempInput = document.createElement('input');
+            tempInput.value = currentModalUid;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Copied!', `Free Fire UID (${currentModalUid}) copied to clipboard.`, 'fa-copy', 'text-amber-400');
+        }
+
+        // Helper Functions
+        function resetPlayerFilters() {
+            document.getElementById('player-search-input').value = '';
+            document.getElementById('player-role-filter').value = 'ALL';
+            document.getElementById('player-rank-filter').value = 'ALL';
+            renderPlayers();
+        }
+
+        function getRoleIcon(role) {
+            switch(role) {
+                case 'Rusher': return '⚡';
+                case 'Sniper': return '🎯';
+                case 'Support': return '🛡️';
+                case 'IGL': return '👑';
+                default: return '🎮';
+            }
+        }
+
+        function showToast(title, msg, icon = 'fa-circle-check', colorClass = 'text-amber-400') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            const iconEl = document.getElementById('toast-icon');
+            iconEl.className = `fa-solid ${icon} ${colorClass} text-xl`;
+
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
